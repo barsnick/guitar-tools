@@ -53,7 +53,7 @@ void AudioBuffer::setFrequency(const double &frequency)
 
 qint64 AudioBuffer::readData(char *data, qint64 maxlen)
 {
-    int channelBytes = m_format.sampleSize() / 8;
+    const int channelBytes = guitarToolsBytesPerSample(m_format);
 
     // Prepare buffer
     QByteArray buffer;
@@ -91,15 +91,10 @@ SineWaveGenerator::SineWaveGenerator(QObject *parent) :
     m_frequency(440),
     m_running(false)
 {
-    m_format.setSampleRate(44100);
-    m_format.setChannelCount(1);
-    m_format.setSampleSize(16);
-    m_format.setCodec("audio/pcm");
-    m_format.setByteOrder(QAudioFormat::LittleEndian);
-    m_format.setSampleType(QAudioFormat::SignedInt);
+    m_format = guitarToolsCreateMono16AudioFormat(44100);
 
     m_buffer = new AudioBuffer(m_format, m_frequency, this);
-    m_audioOutput = new QAudioOutput(m_format, this);
+    m_audioOutput = new GuitarToolsAudioOutputStream(m_format, this);
 
     connect(m_audioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(onAudioOutputStateChanged(QAudio::State)));
 }
@@ -160,5 +155,4 @@ void SineWaveGenerator::onAudioOutputStateChanged(const QAudio::State &state)
         break;
     }
 }
-
 

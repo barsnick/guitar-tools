@@ -25,12 +25,26 @@
 
 Recorder::Recorder(QObject *parent) :
     QObject(parent),
-    m_filePath(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/records"),
+    m_filePath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/records"),
     m_recordTime("00:00:00"),
     m_volumeLevel(0)
 {
-    m_audioRecorder = new QAudioRecorder(this);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    m_audioRecorder = new QMediaRecorder(this);
+    m_captureSession = new QMediaCaptureSession(this);
+    m_audioInput = new QAudioInput(this);
+    m_captureSession->setAudioInput(m_audioInput);
+    m_captureSession->setRecorder(m_audioRecorder);
 
+    QMediaFormat mediaFormat;
+    mediaFormat.setFileFormat(QMediaFormat::Ogg);
+    mediaFormat.setAudioCodec(QMediaFormat::AudioCodec::Vorbis);
+    if (mediaFormat.isSupported(QMediaFormat::Encode)) {
+        m_audioRecorder->setMediaFormat(mediaFormat);
+    }
+    m_audioRecorder->setQuality(QMediaRecorder::HighQuality);
+#else
+    m_audioRecorder = new QAudioRecorder(this);
     qDebug() << "Supported audio codecs:";
     foreach (const QString &codecName, m_audioRecorder->supportedAudioCodecs()) {
         qDebug() << "  ->" << codecName;
@@ -60,7 +74,13 @@ Recorder::Recorder(QObject *parent) :
     m_audioProbe->setSource(m_audioRecorder);
 
     connect(m_audioProbe, SIGNAL(audioBufferProbed(QAudioBuffer)), this, SLOT(onAudioBufferProbed(QAudioBuffer)));
+#endif
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    connect(m_audioRecorder, SIGNAL(recorderStateChanged(QMediaRecorder::RecorderState)), this, SLOT(onStateChanged(QMediaRecorder::RecorderState)));
+#else
     connect(m_audioRecorder, SIGNAL(stateChanged(QMediaRecorder::State)), this, SLOT(onStateChanged(QMediaRecorder::State)));
+#endif
     connect(m_audioRecorder, SIGNAL(durationChanged(qint64)), this, SLOT(onDurationChanged(qint64)));
 
     QDir dir(m_filePath);
@@ -74,7 +94,7 @@ void Recorder::startRecording()
     setRecordTime("00:00:00");
     QString fileName = m_filePath + "/" + QDateTime::currentDateTime().toString("yyyyMMdd-hh-mm-ss-zzz") + ".ogg";
     qDebug() << "Start recording" << fileName;
-    m_audioRecorder->setOutputLocation(QUrl(fileName));
+    m_audioRecorder->setOutputLocation(QUrl::fromLocalFile(fileName));
     m_audioRecorder->record();
 }
 
@@ -115,13 +135,27 @@ bool Recorder::renameRecordFile(const QString &fileName, const QString &newFileN
 
 void Recorder::setMicrophoneVolume(const double &microphoneVolume)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    m_audioInput->setVolume(microphoneVolume / 100.0);
+    qDebug() << "Recorder volume" << m_audioInput->volume();
+#else
     m_audioRecorder->setVolume(microphoneVolume / 100);
     qDebug() << "Recorder volume" << m_audioRecorder->volume();
+#endif
 }
 
 void Recorder::setInputDevice(const QString audioInput)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    foreach (const GuitarToolsAudioDevice &deviceInfo, guitarToolsAudioInputDevices()) {
+        if (audioInput == guitarToolsAudioDeviceName(deviceInfo)) {
+            m_audioInput->setDevice(deviceInfo);
+            break;
+        }
+    }
+#else
     m_audioRecorder->setAudioInput(audioInput);
+#endif
 }
 
 QString Recorder::filePath() const
@@ -136,7 +170,11 @@ QString Recorder::recordTime() const
 
 bool Recorder::running() const
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    return m_audioRecorder->recorderState() == QMediaRecorder::RecordingState;
+#else
     return m_audioRecorder->state() == QAudioRecorder::RecordingState;
+#endif
 }
 
 double Recorder::volumeLevel() const
@@ -156,6 +194,7 @@ void Recorder::setVolumeLevel(const double &volumeLevel)
     emit volumeLevelChanged();
 }
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 void Recorder::onAudioBufferProbed(const QAudioBuffer &audioBuffer)
 {
     const float *data = audioBuffer.constData<float>();
@@ -169,13 +208,18 @@ void Recorder::onAudioBufferProbed(const QAudioBuffer &audioBuffer)
 
     setVolumeLevel(100.0 * maxValue / Analyzer::getPeakValue(audioBuffer.format()));
 }
+#endif
 
 void Recorder::onDurationChanged(const qint64 &duration)
 {
     setRecordTime(QTime::fromMSecsSinceStartOfDay(duration).toString("hh:mm:ss"));
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void Recorder::onStateChanged(const QMediaRecorder::RecorderState &state)
+#else
 void Recorder::onStateChanged(const QMediaRecorder::State &state)
+#endif
 {
     switch (state) {
     case QMediaRecorder::RecordingState:
@@ -194,5 +238,3 @@ void Recorder::onStateChanged(const QMediaRecorder::State &state)
         break;
     }
 }
-
-

@@ -40,7 +40,13 @@ ComposeTool::ComposeTool(QObject *parent) :
     m_rythmBeats(4),
     m_enableMetronome(false),
     m_scaleValue(1.0),
-    m_outputDir(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/songs/")
+    m_outputDir(
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+#else
+        QStandardPaths::writableLocation(QStandardPaths::DataLocation)
+#endif
+        + "/songs/")
 {
     if (!m_outputDir.exists()) {
         qDebug() << "Create song dir" << m_outputDir.canonicalPath();
@@ -52,7 +58,7 @@ ComposeTool::ComposeTool(QObject *parent) :
 
     // Configure TimeLine
     setUpdateInterval(16);
-    setCurveShape(QTimeLine::LinearCurve);
+    setEasingCurve(QEasingCurve::Linear);
 
     connect(this, SIGNAL(frameChanged(int)), this, SLOT(onFrameChanged(int)));
     connect(this, SIGNAL(valueChanged(qreal)), this, SLOT(onValueChanged(qreal)));

@@ -49,7 +49,7 @@ qint64 Analyzer::readData(char *data, qint64 maxlen)
 
 qint64 Analyzer::writeData(const char *data, qint64 maxlen)
 {
-    int channelBytes = m_format.sampleSize() / 8; // 2
+    const int channelBytes = guitarToolsBytesPerSample(m_format);
     int sum = 0;
 
     if (maxlen % channelBytes != 0) {
@@ -152,6 +152,25 @@ double Analyzer::volumeLevel() const
 
 qint16 Analyzer::getValueInt16(const QAudioFormat &format, const uchar *ptr)
 {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    switch (format.sampleFormat()) {
+    case QAudioFormat::UInt8:
+        return qint16(*reinterpret_cast<const quint8 *>(ptr)) - qint16(CHAR_MAX);
+    case QAudioFormat::Int16:
+        return qFromLittleEndian<qint16>(ptr);
+    case QAudioFormat::Int32:
+        return qint16(qFromLittleEndian<qint32>(ptr) / 65536);
+    case QAudioFormat::Float: {
+        const float value = *reinterpret_cast<const float *>(ptr);
+        return qint16(qBound(-1.0f, value, 1.0f) * SHRT_MAX);
+    }
+    case QAudioFormat::Unknown:
+    case QAudioFormat::NSampleFormats:
+        return 0;
+    }
+
+    return 0;
+#else
     qint16 realValue = 0;
     if (format.sampleSize() == 8) {
         const qint16 value = *reinterpret_cast<const quint8*>(ptr);
@@ -175,6 +194,7 @@ qint16 Analyzer::getValueInt16(const QAudioFormat &format, const uchar *ptr)
         }
     }
     return realValue;
+#endif
 }
 
 double Analyzer::getPeakValue(const QAudioFormat &format)
@@ -182,6 +202,21 @@ double Analyzer::getPeakValue(const QAudioFormat &format)
     if (!format.isValid())
         return double(0);
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    switch (format.sampleFormat()) {
+    case QAudioFormat::Unknown:
+    case QAudioFormat::NSampleFormats:
+        break;
+    case QAudioFormat::Float:
+        return double(1.00003);
+    case QAudioFormat::Int16:
+        return double(SHRT_MAX);
+    case QAudioFormat::Int32:
+        return double(INT_MAX);
+    case QAudioFormat::UInt8:
+        return double(UCHAR_MAX);
+    }
+#else
     if (format.codec() != "audio/pcm")
         return double(0);
 
@@ -209,6 +244,7 @@ double Analyzer::getPeakValue(const QAudioFormat &format)
             return double(UCHAR_MAX);
         break;
     }
+#endif
 
     return double(0);
 }
@@ -339,5 +375,4 @@ float Analyzer::processSecondOrderFilter(float x, float *mem, float *a, float *b
     mem[2] = ret;
     return ret;
 }
-
 

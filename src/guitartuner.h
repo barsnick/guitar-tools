@@ -24,10 +24,6 @@
 #include <QObject>
 #include <QTimer>
 #include <QFile>
-#include <QAudioFormat>
-#include <QAudioInput>
-#include <QAudioDeviceInfo>
-#include <QAudioRecorder>
 
 #include "audioinput.h"
 #include "analyzer.h"

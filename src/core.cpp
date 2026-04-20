@@ -132,8 +132,8 @@ ComposeTool *Core::composeTool()
 QStringList Core::inputDevices() const
 {
     QStringList inputDevices;
-    foreach (const QAudioDeviceInfo &deviceInfo, QAudioDeviceInfo::availableDevices(QAudio::AudioInput)) {
-        inputDevices.append(deviceInfo.deviceName());
+    foreach (const GuitarToolsAudioDevice &deviceInfo, guitarToolsAudioInputDevices()) {
+        inputDevices.append(guitarToolsAudioDeviceName(deviceInfo));
     }
 
     return inputDevices;

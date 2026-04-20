@@ -22,8 +22,9 @@
 #define SINEWAVEGENERATOR_H
 
 #include <QObject>
-#include <QAudioOutput>
 #include <QIODevice>
+
+#include "qtmultimediacompat.h"
 
 class AudioBuffer: public QIODevice
 {
@@ -70,7 +71,7 @@ public:
 private:
     QAudioFormat m_format;
     AudioBuffer *m_buffer;
-    QAudioOutput *m_audioOutput;
+    GuitarToolsAudioOutputStream *m_audioOutput;
 
     double m_frequency;
     bool m_running;

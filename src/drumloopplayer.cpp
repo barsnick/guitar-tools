@@ -33,7 +33,13 @@ DrumLoopPlayer::DrumLoopPlayer(const double &volume, QObject *parent) :
     QObject(parent),
     m_soundEffect(0),
     m_inputFileName(QString()),
-    m_outputFileName(QStandardPaths::writableLocation(QStandardPaths::DataLocation) + "/transformed-loop.wav"),
+    m_outputFileName(
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+#else
+        QStandardPaths::writableLocation(QStandardPaths::DataLocation)
+#endif
+        + "/transformed-loop.wav"),
     m_watcher(new QFutureWatcher<void>(this)),
     m_volume(volume),
     m_bpm(100),
@@ -124,7 +130,7 @@ void DrumLoopPlayer::play(const QString &filePath)
     } else {
         m_fileChanged = false;
     }
-     m_watcher->setFuture(QtConcurrent::run(this, &DrumLoopPlayer::processFile));
+    m_watcher->setFuture(QtConcurrent::run([this]() { processFile(); }));
 }
 
 void DrumLoopPlayer::processFile()
@@ -243,4 +249,3 @@ void DrumLoopPlayer::processFinished()
     m_soundEffect->setSource(QUrl::fromLocalFile(m_outputFileName));
     m_soundEffect->play();
 }
-

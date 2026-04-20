@@ -38,7 +38,7 @@ qint64 VolumeAnalyzer::readData(char *data, qint64 maxlen)
 
 qint64 VolumeAnalyzer::writeData(const char *data, qint64 maxlen)
 {
-    int channelBytes = m_format.sampleSize() / 8;
+    const int channelBytes = guitarToolsBytesPerSample(m_format);
     if (maxlen % channelBytes != 0) {
         qWarning() << "Invalid data size. Rejecting data.";
         return maxlen;
@@ -78,5 +78,4 @@ double VolumeAnalyzer::volumeLevel() const
 {
     return m_volumeLevel;
 }
-
 

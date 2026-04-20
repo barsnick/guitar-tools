@@ -25,7 +25,8 @@ AudioInput::AudioInput(const QAudioFormat &inputFormat, QObject *parent) :
     m_inputFormat(inputFormat),
     m_isRunning(false)
 {
-    m_audioInput = new QAudioInput(inputFormat, this);
+    m_audioInput = new GuitarToolsAudioInputStream(inputFormat, this);
+    connect(m_audioInput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(onAudioInputStateChanged(QAudio::State)));
 }
 
 void AudioInput::start(QIODevice *device)
@@ -60,10 +61,10 @@ void AudioInput::setInputDevices(const QString &inputDevice)
     }
 
     // Get the audiodevice with the given name
-    QAudioDeviceInfo audioDeviceInfo;
-    foreach (const QAudioDeviceInfo &deviceInfo, QAudioDeviceInfo::availableDevices(QAudio::AudioInput)) {
-        if (inputDevice == deviceInfo.deviceName()) {
-            qDebug() << "Change AudioInput device to" << deviceInfo.deviceName();
+    GuitarToolsAudioDevice audioDeviceInfo;
+    foreach (const GuitarToolsAudioDevice &deviceInfo, guitarToolsAudioInputDevices()) {
+        if (inputDevice == guitarToolsAudioDeviceName(deviceInfo)) {
+            qDebug() << "Change AudioInput device to" << guitarToolsAudioDeviceName(deviceInfo);
             audioDeviceInfo = deviceInfo;
             break;
         }
@@ -72,17 +73,18 @@ void AudioInput::setInputDevices(const QString &inputDevice)
     // Use default if not found
     if (audioDeviceInfo.isNull()) {
         qWarning() << "AudioInput device" << inputDevice << "could not be found";
-        audioDeviceInfo = QAudioDeviceInfo::defaultInputDevice();
-        qDebug() << "Using default audio input device" << audioDeviceInfo.deviceName();
-        m_inputDevice = audioDeviceInfo.deviceName();
-        emit inputDeviceChanged();
+        audioDeviceInfo = guitarToolsDefaultAudioInputDevice();
+        qDebug() << "Using default audio input device" << guitarToolsAudioDeviceName(audioDeviceInfo);
     }
+
+    m_inputDevice = guitarToolsAudioDeviceName(audioDeviceInfo);
+    emit inputDeviceChanged();
 
     // delete if we already have an audio input
     if (m_audioInput)
         delete m_audioInput;
 
-    m_audioInput = new QAudioInput(audioDeviceInfo, m_inputFormat, this);
+    m_audioInput = new GuitarToolsAudioInputStream(audioDeviceInfo, m_inputFormat, this);
     connect(m_audioInput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(onAudioInputStateChanged(QAudio::State)));
 }
 
@@ -111,4 +113,3 @@ void AudioInput::onAudioInputStateChanged(const QAudio::State &state)
         break;
     }
 }
-

@@ -23,10 +23,10 @@
 
 #include <QObject>
 #include <QIODevice>
-#include <QAudioFormat>
 #include <QStringList>
 #include <QDebug>
 
+#include "qtmultimediacompat.h"
 #include "music.h"
 #include "libfft.h"
 

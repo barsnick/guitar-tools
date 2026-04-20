@@ -26,13 +26,7 @@
 
 Settings::Settings(QObject *parent) : QObject(parent)
 {
-    QAudioFormat inputFormat;
-    inputFormat.setSampleRate(8000);
-    inputFormat.setCodec("audio/pcm");
-    inputFormat.setSampleSize(16);
-    inputFormat.setChannelCount(1);
-    inputFormat.setByteOrder(QAudioFormat::LittleEndian);
-    inputFormat.setSampleType(QAudioFormat::SignedInt);
+    const QAudioFormat inputFormat = guitarToolsCreateMono16AudioFormat(8000);
 
     m_audioInput = new AudioInput(inputFormat, this);
     m_analyzer = new VolumeAnalyzer(inputFormat, this);
@@ -40,10 +34,10 @@ Settings::Settings(QObject *parent) : QObject(parent)
     connect(m_analyzer, SIGNAL(volumeLevelChanged()), this, SIGNAL(currentMicrophoneVolumeChanged()));
 
     QSettings settings;
-    qDebug() << "Load settings" << settings.fileName() << endl << "--------------------------------------";
+    qDebug() << "Load settings" << settings.fileName() << "\n--------------------------------------";
 
     settings.beginGroup("audio");
-    setInputSource(settings.value("inputSource", QAudioDeviceInfo::defaultInputDevice().deviceName()).toString());
+    setInputSource(settings.value("inputSource", guitarToolsAudioDeviceName(guitarToolsDefaultAudioInputDevice())).toString());
     setMicrophoneVolume(settings.value("microphoneVolume", 50).toInt());
     settings.endGroup();
 

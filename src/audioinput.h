@@ -24,7 +24,8 @@
 #include <QDebug>
 #include <QObject>
 #include <QPointer>
-#include <QAudioInput>
+
+#include "qtmultimediacompat.h"
 
 class AudioInput : public QObject
 {
@@ -48,7 +49,7 @@ private:
     QString m_inputDevice;
     double m_volume;
     bool m_isRunning;
-    QPointer<QAudioInput> m_audioInput;
+    QPointer<GuitarToolsAudioInputStream> m_audioInput;
     QIODevice *m_device;
 
 signals:

@@ -27,13 +27,7 @@ GuitarTuner::GuitarTuner(QObject *parent) :
     m_centValue(0),
     m_frequency(440)
 {
-    QAudioFormat inputFormat;
-    inputFormat.setSampleRate(8000);
-    inputFormat.setCodec("audio/pcm");
-    inputFormat.setSampleSize(16);
-    inputFormat.setChannelCount(1);
-    inputFormat.setByteOrder(QAudioFormat::LittleEndian);
-    inputFormat.setSampleType(QAudioFormat::SignedInt);
+    const QAudioFormat inputFormat = guitarToolsCreateMono16AudioFormat(8000);
 
     m_audioInput = new AudioInput(inputFormat, this);
     m_analyzer = new Analyzer(inputFormat, this);

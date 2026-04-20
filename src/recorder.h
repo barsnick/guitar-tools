@@ -22,13 +22,11 @@
 #define RECORDER_H
 
 #include <QObject>
-#include <QAudioRecorder>
-#include <QAudioProbe>
-#include <QAudioFormat>
 #include <QStandardPaths>
 #include <QUrl>
 #include <QDir>
 
+#include "qtmultimediacompat.h"
 #include "audioinput.h"
 #include "volumeanalyzer.h"
 
@@ -60,8 +58,14 @@ public:
     double volumeLevel() const;
 
 private:
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    QMediaRecorder *m_audioRecorder;
+    QMediaCaptureSession *m_captureSession;
+    QAudioInput *m_audioInput;
+#else
     QAudioRecorder *m_audioRecorder;
     QAudioProbe *m_audioProbe;
+#endif
 
     QString m_filePath;
     QString m_recordTime;
@@ -71,9 +75,15 @@ private:
     void setVolumeLevel(const double &volumeLevel);
 
 private slots:
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     void onAudioBufferProbed(const QAudioBuffer& audioBuffer);
+#endif
     void onDurationChanged(const qint64& duration);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    void onStateChanged(const QMediaRecorder::RecorderState &state);
+#else
     void onStateChanged(const QMediaRecorder::State &state);
+#endif
 
 signals:
     void runningChanged();

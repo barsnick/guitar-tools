@@ -23,8 +23,9 @@
 
 #include <QObject>
 #include <QIODevice>
-#include <QAudioFormat>
 #include <QtEndian>
+
+#include "qtmultimediacompat.h"
 
 class VolumeAnalyzer : public QIODevice
 {
