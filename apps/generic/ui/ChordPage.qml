@@ -21,7 +21,7 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import QtMultimedia 5.9
+import QtMultimedia
 import QtQuick.Controls.Material 2.2
 
 import GuitarTools 1.0
@@ -384,6 +384,5 @@ Page {
 
     ChordsBottomEdge { id: bottomEdge }
 }
-
 
 

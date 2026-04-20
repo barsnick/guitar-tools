@@ -19,7 +19,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 import QtQuick 2.7
-import QtMultimedia 5.4
+import QtMultimedia
 import GuitarTools 1.0
 
 
