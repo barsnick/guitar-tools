@@ -44,7 +44,13 @@ void ChordsProxy::setChords(Chords *chords)
 void ChordsProxy::setFilter(const int &note)
 {
     m_noteFilter = (Music::Note)note;
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+    beginFilterChange();
+    endFilterChange(QSortFilterProxyModel::Direction::Rows);
+#else
     invalidateFilter();
+#endif
     sort(0);
 }
 
@@ -70,4 +76,3 @@ bool ChordsProxy::lessThan(const QModelIndex &left, const QModelIndex &right) co
 
     return QString::localeAwareCompare(leftName.toString(), rightName.toString()) < 0;
 }
-
