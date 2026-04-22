@@ -54,16 +54,22 @@ int main(int argc, char *argv[])
 
     QDir dataDir;
     if (!parser.positionalArguments().isEmpty()) {
-        dataDir = QDir::cleanPath(QCoreApplication::applicationDirPath() + "/" + parser.positionalArguments().first());
-        if (!dataDir.exists()) {
-            qWarning() << dataDir.path() << "does not exist.";
-            exit(-1);
-        }
+        dataDir.setPath(QDir::cleanPath(QCoreApplication::applicationDirPath() + "/" + parser.positionalArguments().first()));
     } else {
-        dataDir = QDir("../../../guitar-tools/data/");
+        // Fedora's QStandardPaths::AppDataLocation returns "share/guitar-tools/guitar-tools"
+        QStringList allDataLocations = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+        allDataLocations.append("../../..");
+        foreach(const QString& path, allDataLocations) {
+            dataDir.setPath(QDir::cleanPath(path + "/guitar-tools/data"));
+            if (dataDir.exists()) {
+                break;
+            }
+        }
     }
-
-
+    if (!dataDir.exists()) {
+        qWarning() << "Data dir not found.";
+        exit(-1);
+    }
     qDebug() << "Using data dir" << dataDir.canonicalPath();
 
     Core::instance()->setDataDir(dataDir);
