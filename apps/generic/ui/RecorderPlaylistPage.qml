@@ -60,7 +60,7 @@ Page {
 
     Connections {
         target: Qt.application
-        onActiveChanged: {
+        function onActiveChanged() {
             if (!Qt.application.active)
                 player.stop()
         }

@@ -41,7 +41,7 @@ Item {
         opacity: root.progress
         MouseArea {
             anchors.fill: parent
-            onClicked: {
+            onClicked: function(mouse) {
                 root.progress = 0;
                 mouse.accepted = true;
             }
@@ -56,7 +56,7 @@ Item {
 
         property var gesturePoints: new Array()
 
-        onPressed: {
+        onPressed: function(mouse) {
             gesturePoints = new Array();
             ignoring = false;
             if (root.progress == 0 && mouseY < height - units.gu(2)) {
@@ -256,4 +256,3 @@ Item {
         }
     }
 }
-

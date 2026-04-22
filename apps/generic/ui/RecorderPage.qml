@@ -145,7 +145,9 @@ Page {
 
         Connections {
             target: Core.recorder
-            onVolumeLevelChanged: frequencyCanvas.requestPaint()
+            function onVolumeLevelChanged() {
+                frequencyCanvas.requestPaint()
+            }
         }
     }
 

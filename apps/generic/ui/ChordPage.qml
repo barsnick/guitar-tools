@@ -65,7 +65,7 @@ Page {
 
     Connections {
         target: chordPlayer
-        onStringPlucked: {
+        function onStringPlucked(stringNumber) {
             indicatorRepeater.itemAt(stringNumber).pluck()
         }
     }
@@ -383,4 +383,3 @@ Page {
 
     ChordsBottomEdge { id: bottomEdge }
 }
-

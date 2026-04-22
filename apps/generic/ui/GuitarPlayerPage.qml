@@ -483,7 +483,9 @@ Page {
         ChordPlayer {
             id: chordPlayer
             chord: chordSelectionPopup.chord
-            onStringPlucked: indicatorRepeater.itemAt(stringNumber).pluck()
+            onStringPlucked: function(stringNumber) {
+                indicatorRepeater.itemAt(stringNumber).pluck()
+            }
         }
 
         ColumnLayout {
@@ -618,5 +620,4 @@ Page {
 
     GuitarBottomEdge { id: bottomEdge }
 }
-
 

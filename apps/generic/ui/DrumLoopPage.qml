@@ -52,7 +52,7 @@ Page {
 
     Connections {
         target: Qt.application
-        onActiveChanged: {
+        function onActiveChanged() {
             if (!Qt.application.active)
                 Core.drumLoopPlayer.stop()
         }
@@ -111,7 +111,9 @@ Page {
 
                 Connections {
                     target: Core.drumLoopPlayer
-                    onBpmChanged: bpmSlider.value = Math.round(Core.drumLoopPlayer.bpm)
+                    function onBpmChanged() {
+                        bpmSlider.value = Math.round(Core.drumLoopPlayer.bpm)
+                    }
                 }
 
                 Icon {
@@ -223,4 +225,3 @@ Page {
         }
     }
 }
-

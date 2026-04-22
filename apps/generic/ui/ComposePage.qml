@@ -21,7 +21,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import QtQuick.Dialogs 1.2
 import QtQuick.Controls.Material 2.2
 
 import GuitarTools 1.0
@@ -79,10 +78,19 @@ Page {
 
     Connections {
         target: Core.composeTool
-        onPlayingChanged: moveMarkInView()
-        onScaleValueChanged: moveMarkInView()
-        onCurrentTimeStringChanged: moveMarkInView()
-        onSongLoaded:  {
+        function onPlayingChanged() {
+            moveMarkInView()
+        }
+
+        function onScaleValueChanged() {
+            moveMarkInView()
+        }
+
+        function onCurrentTimeStringChanged() {
+            moveMarkInView()
+        }
+
+        function onSongLoaded() {
             composeScale.update()
             scaleGrid.update()
             moveMarkInView()
@@ -419,8 +427,13 @@ Page {
 
                                 Connections {
                                     target: Core.composeTool.notes.get(model.coordinate)
-                                    onPlucked: pluckAnimation.restart()
-                                    onRemoved: removeAnimation.start()
+                                    function onPlucked() {
+                                        pluckAnimation.restart()
+                                    }
+
+                                    function onRemoved() {
+                                        removeAnimation.start()
+                                    }
                                 }
 
                                 Label {

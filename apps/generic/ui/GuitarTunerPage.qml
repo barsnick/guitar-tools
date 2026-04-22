@@ -74,7 +74,9 @@ Page {
 
     Connections {
         target: Core.guitarTuner
-        onVolumeLevelChanged: frequencyCanvas.requestPaint()
+        function onVolumeLevelChanged() {
+            frequencyCanvas.requestPaint()
+        }
     }
 
     ColumnLayout {
@@ -199,4 +201,3 @@ Page {
 
     TunerBottomEdge { id: bottomEdge }
 }
-
