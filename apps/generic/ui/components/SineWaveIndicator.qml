@@ -28,9 +28,7 @@ import GuitarTools 1.0
 
 Item {
     id: root
-    anchors.left: parent.left
-    anchors.right: parent.right
-    height: 60
+    implicitHeight: 60
 
     property real indicatorValue
     property real speed: 1

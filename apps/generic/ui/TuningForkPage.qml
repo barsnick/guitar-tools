@@ -264,10 +264,9 @@ Page {
 
             SineWaveIndicator {
                 id: sineWave
-                anchors.left: parent.left
-                anchors.leftMargin: 5
-                anchors.right: parent.right
-                anchors.rightMargin: 5
+                Layout.fillWidth: true
+                Layout.leftMargin: 5
+                Layout.rightMargin: 5
                 indicatorValue: volumeSlider.value / 2
                 speed: 1
                 running: Core.sineWaveGenerator.running
@@ -277,10 +276,9 @@ Page {
 
 
             RowLayout {
-                anchors.left: parent.left
-                anchors.leftMargin: 5
-                anchors.right: parent.right
-                anchors.rightMargin: 5
+                Layout.fillWidth: true
+                Layout.leftMargin: 5
+                Layout.rightMargin: 5
 
                 IconToolButton {
                     iconSource: dataDirectory + "/icons/audio-speakers-muted-symbolic.svg"
@@ -306,10 +304,9 @@ Page {
             }
 
             RowLayout {
-                anchors.left: parent.left
-                anchors.leftMargin: 5
-                anchors.right: parent.right
-                anchors.rightMargin: 5
+                Layout.fillWidth: true
+                Layout.leftMargin: 5
+                Layout.rightMargin: 5
 
                 IconToolButton {
                     iconSource: dataDirectory + "/icons/frequency-low.svg"

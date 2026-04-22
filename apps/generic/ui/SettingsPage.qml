@@ -83,7 +83,7 @@ Page {
 
             spacing: 2
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
             Label {
                 Layout.alignment: Qt.AlignHCenter
@@ -92,7 +92,7 @@ Page {
                 text: qsTr("General settings")
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
 
             RowLayout {
@@ -160,7 +160,7 @@ Page {
                 }
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
 
             Label {
@@ -169,8 +169,7 @@ Page {
             }
 
             RowLayout {
-                anchors.left: parent.left
-                anchors.right: parent.right
+                Layout.fillWidth: true
 
                 IconToolButton {
                     iconSource: dataDirectory + "/icons/remove.svg"
@@ -193,7 +192,7 @@ Page {
                 }
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
 
             Label {
@@ -203,7 +202,7 @@ Page {
                 text: qsTr("Guitar tuner")
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
             Label {
                 Layout.alignment: Qt.AlignLeft
@@ -233,7 +232,7 @@ Page {
                 }
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
 
             Label {
@@ -242,7 +241,7 @@ Page {
                 text: qsTr("Guitar")
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
             RowLayout {
                 Layout.fillWidth: true
@@ -266,7 +265,7 @@ Page {
                 }
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
 
             RowLayout {
@@ -292,7 +291,7 @@ Page {
                 }
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
 
             Label {
@@ -302,7 +301,7 @@ Page {
                 text: qsTr("Audio input")
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
 
             Label {
@@ -342,7 +341,7 @@ Page {
                 value: Core.settings.currentMicrophoneVolume
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
             Label {
                 Layout.alignment: Qt.AlignHCenter
@@ -351,7 +350,7 @@ Page {
                 text: qsTr("Audio output")
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
 
             Label {
@@ -360,8 +359,7 @@ Page {
             }
 
             RowLayout {
-                anchors.left: parent.left
-                anchors.right: parent.right
+                Layout.fillWidth: true
 
                 IconToolButton {
                     iconSource: dataDirectory + "/icons/audio-speakers-muted-symbolic.svg"
@@ -384,7 +382,7 @@ Page {
                 }
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
             Label {
                 // TRANSLATORS: In the settings page the guitar player volume.
@@ -392,8 +390,7 @@ Page {
             }
 
             RowLayout {
-                anchors.left: parent.left
-                anchors.right: parent.right
+                Layout.fillWidth: true
 
                 IconToolButton {
                     iconSource: dataDirectory + "/icons/audio-speakers-muted-symbolic.svg"
@@ -458,7 +455,7 @@ Page {
 //                }
 //            }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
             Item {
                 Layout.fillWidth: true
@@ -506,7 +503,7 @@ Page {
                 }
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
             Item {
                 Layout.fillWidth: true
@@ -566,7 +563,7 @@ Page {
                 }
             }
 
-            MenuSeparator { anchors.left: parent.left; anchors.right: parent.right }
+            MenuSeparator { Layout.fillWidth: true }
 
         }
     }
