@@ -17,6 +17,7 @@ CONFIG += c++11
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/qtmultimediacompat.h \
     $$PWD/guitartuner.h \
     $$PWD/libfft.h \
     $$PWD/core.h \

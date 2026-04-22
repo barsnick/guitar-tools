@@ -52,6 +52,10 @@ QDir Core::dataDir() const
 void Core::setDataDir(const QDir &dataDir)
 {
     m_dataDir = dataDir;
+
+    if (m_metronome) {
+        m_metronome->setDataDir(m_dataDir);
+    }
 }
 
 Settings *Core::settings()
@@ -505,7 +509,9 @@ Core::Core(QObject *parent) :
     m_recorder->setInputDevice(m_settings->inputSource());
 
     m_metronome = new Metronome(this);
+    m_metronome->setDataDir(m_dataDir);
     m_metronome->setBpm(m_settings->metronomeSpeed());
+    m_metronome->setVolume(m_settings->metronomeVolume());
 
     m_drumLoopPlayer = new DrumLoopPlayer(m_settings->drumLoopsVolume(), this);
 
@@ -518,6 +524,7 @@ Core::Core(QObject *parent) :
     connect(m_settings, SIGNAL(microphoneVolumeChanged()), this, SLOT(onMicrophoneVolumeChanged()));
     connect(m_settings, SIGNAL(pitchStandardChanged()), this, SLOT(onPitchStandardChanged()));
     connect(m_settings, SIGNAL(guitarPlayerVolumeChanged()), this, SLOT(onGuitarVolumeChanged()));
+    connect(m_settings, SIGNAL(metronomeVolumeChanged()), this, SLOT(onMetronomeVolumeChanged()));
     connect(m_settings, SIGNAL(drumLoopsVolumeChanged()), this, SLOT(onDrumLoopVolumeChanged()));
 
     updateColorValues();
@@ -612,6 +619,11 @@ void Core::onPitchStandardChanged()
 void Core::onGuitarVolumeChanged()
 {
     m_notePlayer->setVolume(m_settings->guitarPlayerVolume());
+}
+
+void Core::onMetronomeVolumeChanged()
+{
+    m_metronome->setVolume(m_settings->metronomeVolume());
 }
 
 void Core::onDrumLoopVolumeChanged()

@@ -21,7 +21,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import QtMultimedia
 import QtQuick.Controls.Material 2.2
 
 import GuitarTools 1.0
@@ -54,24 +53,11 @@ Page {
 
     property int bpm: Core.metronome.bpm
     property int duration: Core.metronome.period * 1.02
-    property real metronomeVolume: Core.settings.metronomeVolume / 100
     property real angle: angleMax
     property real angleMin: 25
     property real angleMax: -25
 
     Component.onDestruction: Core.metronome.stop()
-
-    SoundEffect {
-        id: tickSound
-        source: dataDirectory + "/sounds/metronome/tick.wav"
-        volume: metronomeVolume
-    }
-
-    SoundEffect {
-        id: tockSound
-        source: dataDirectory + "/sounds/metronome/tock.wav"
-        volume: metronomeVolume
-    }
 
     NumberAnimation {
         id: pendulumTickAnimation
@@ -95,19 +81,18 @@ Page {
 
     Connections {
         target: Core.metronome
-        onTick: {
-            tickSound.play()
+        function onTick() {
             pendulumTickAnimation.start()
         }
-        onTock: {
-            tockSound.play()
+
+        function onTock() {
             pendulumTockAnimation.start()
         }
     }
 
     Connections {
         target: Qt.application
-        onActiveChanged: {
+        function onActiveChanged() {
             if (!Qt.application.active)
                 Core.metronome.stop()
         }
@@ -246,4 +231,3 @@ Page {
 
     MetronomeBottomEdge { id: bottomEdge }
 }
-

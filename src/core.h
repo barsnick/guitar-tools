@@ -154,6 +154,7 @@ private slots:
     void onInputDeviceChanged();
     void onPitchStandardChanged();
     void onGuitarVolumeChanged();
+    void onMetronomeVolumeChanged();
     void onDrumLoopVolumeChanged();
 
     void onGuitarChordsUpdated();

@@ -24,6 +24,7 @@
 #include <QObject>
 #include <QTimer>
 #include <QSoundEffect>
+#include <QDir>
 
 class Metronome : public QObject
 {
@@ -38,6 +39,8 @@ public:
 
     Q_INVOKABLE void start();
     Q_INVOKABLE void stop();
+    void setDataDir(const QDir &dataDir);
+    void setVolume(const int &volume);
 
     bool running() const;
 
@@ -53,6 +56,7 @@ private:
     QTimer *m_timer;
     QSoundEffect *m_tickEffect;
     QSoundEffect *m_tockEffect;
+    QDir m_dataDir;
 
     bool m_running;
     bool m_tick;
@@ -64,6 +68,7 @@ private:
 
     void setRunning(const bool &running);
     void setTempoName(const QString &tempoName);
+    void updateSoundEffects();
 
 public slots:
     void onTimeout();

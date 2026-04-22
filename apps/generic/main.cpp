@@ -35,7 +35,9 @@
 
 int main(int argc, char *argv[])
 {
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
 
     QGuiApplication app(argc, argv);
     app.setApplicationName("guitar-tools");
@@ -79,7 +81,11 @@ int main(int argc, char *argv[])
     qmlRegisterType<ComposeGrid>("GuitarTools", 1, 0, "ComposeGrid");
     qmlRegisterType<ComposeScale>("GuitarTools", 1, 0, "ComposeScale");
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    qmlRegisterUncreatableMetaObject(Music::staticMetaObject, "GuitarTools", 1, 0, "Music", "Can't create this in QML.");
+#else
     qmlRegisterUncreatableType<Music>("GuitarTools", 1, 0, "Music", "Can't create this in QML. Get it from the Core instance.");
+#endif
 
     qmlRegisterUncreatableType<Settings>("GuitarTools", 1, 0, "Settings", "Can't create this in QML. Get it from the Core instance.");
     qmlRegisterUncreatableType<AudioInput>("GuitarTools", 1, 0, "AudioInput", "Can't create this in QML. Get it from the Core instance.");

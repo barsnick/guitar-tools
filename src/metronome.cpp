@@ -22,9 +22,13 @@
 #include "core.h"
 
 #include <QDebug>
+#include <QFileInfo>
+#include <QUrl>
 
 Metronome::Metronome(QObject *parent) :
     QObject(parent),
+    m_tickEffect(new QSoundEffect(this)),
+    m_tockEffect(new QSoundEffect(this)),
     m_running(false),
     m_tick(true)
 {
@@ -39,6 +43,9 @@ Metronome::Metronome(QObject *parent) :
     qDebug() << "BPM:" << m_bpm << " -> dt=" << m_period << m_tempoName;
 
     connect(m_timer, &QTimer::timeout, this, &Metronome::onTimeout);
+
+    m_tickEffect->setLoopCount(1);
+    m_tockEffect->setLoopCount(1);
 }
 
 void Metronome::start()
@@ -60,6 +67,19 @@ void Metronome::stop()
 
     m_timer->stop();
     setRunning(false);
+}
+
+void Metronome::setDataDir(const QDir &dataDir)
+{
+    m_dataDir = dataDir;
+    updateSoundEffects();
+}
+
+void Metronome::setVolume(const int &volume)
+{
+    const qreal soundVolume = qBound<qreal>(0.0, volume / 100.0, 1.0);
+    m_tickEffect->setVolume(soundVolume);
+    m_tockEffect->setVolume(soundVolume);
 }
 
 bool Metronome::running() const
@@ -130,6 +150,24 @@ void Metronome::setTempoName(const QString &tempoName)
     emit tempoNameChanged();
 }
 
+void Metronome::updateSoundEffects()
+{
+    const QString tickFilePath = m_dataDir.filePath("sounds/metronome/tick.wav");
+    const QString tockFilePath = m_dataDir.filePath("sounds/metronome/tock.wav");
+
+    if (QFileInfo::exists(tickFilePath)) {
+        m_tickEffect->setSource(QUrl::fromLocalFile(tickFilePath));
+    } else {
+        m_tickEffect->setSource(QUrl());
+    }
+
+    if (QFileInfo::exists(tockFilePath)) {
+        m_tockEffect->setSource(QUrl::fromLocalFile(tockFilePath));
+    } else {
+        m_tockEffect->setSource(QUrl());
+    }
+}
+
 void Metronome::onTimeout()
 {
     if (m_tmpPeriod != m_period) {
@@ -141,12 +179,13 @@ void Metronome::onTimeout()
 
     if (m_tick) {
         qDebug() << "Tick  -->";
+        m_tickEffect->play();
         emit tick();
         m_tick = false;
     } else {
         qDebug() << "Tock  <--";
+        m_tockEffect->play();
         emit tock();
         m_tick = true;
     }
 }
-

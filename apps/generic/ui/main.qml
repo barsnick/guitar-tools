@@ -71,7 +71,7 @@ ApplicationWindow {
 //        onDarkThemeEnabledChanged: Core.settings.darkThemeEnabled ? Theme.name = "Ubuntu.Components.Themes.SuruDark" : Theme.name = "Ubuntu.Components.Themes.Ambiance"
 //    }
 
-    onClosing: {
+    onClosing: function(close) {
         if(pageStack.depth > 1){
             close.accepted = false
             pageStack.pop();
@@ -172,4 +172,3 @@ ApplicationWindow {
     }
 
 }
-
