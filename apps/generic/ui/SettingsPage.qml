@@ -72,7 +72,10 @@ Page {
     Flickable {
         id: settingsFlickable
         anchors.fill: parent
+        clip: true
         contentHeight: paramColumn.height
+        contentWidth: width
+        ScrollIndicator.vertical: ScrollIndicator { }
 
         ColumnLayout {
             id: paramColumn
