@@ -39,6 +39,8 @@ public:
 
     qint64 readData(char *data, qint64 maxlen);
     qint64 writeData(const char *data, qint64 maxlen);
+    qint64 bytesAvailable() const override;
+    bool isSequential() const override;
 
 private:
     QAudioFormat m_format;

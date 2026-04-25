@@ -501,7 +501,7 @@ Core::Core(QObject *parent) :
     m_guitarTuner->setPitchStandard(m_settings->pitchStandard());
 
     m_sineWaveGenerator = new SineWaveGenerator(this);
-    m_sineWaveGenerator->setVolume(m_settings->tuningForkVolume());
+    m_sineWaveGenerator->setVolume(m_settings->tuningForkVolume() / 100.0);
     m_sineWaveGenerator->setFrequency(m_settings->tuningForkFrequency());
 
     m_recorder = new Recorder(this);

@@ -23,6 +23,7 @@
 
 #include <QDebug>
 #include <QtEndian>
+#include <cstring>
 #include <math.h>
 
 AudioBuffer::AudioBuffer(QAudioFormat format, double frequency, QObject *parent):
@@ -54,6 +55,12 @@ void AudioBuffer::setFrequency(const double &frequency)
 qint64 AudioBuffer::readData(char *data, qint64 maxlen)
 {
     const int channelBytes = guitarToolsBytesPerSample(m_format);
+    const int bytesPerFrame = guitarToolsBytesPerFrame(m_format);
+    const int channelCount = m_format.channelCount();
+
+    if (channelBytes <= 0 || bytesPerFrame <= 0 || channelCount <= 0) {
+        return 0;
+    }
 
     // Prepare buffer
     QByteArray buffer;
@@ -61,13 +68,46 @@ qint64 AudioBuffer::readData(char *data, qint64 maxlen)
     unsigned char *ptr = reinterpret_cast<unsigned char *>(buffer.data());
 
     // Calculate sine values for maxlen (and phase position to get a continuous stream)
-    for (int i = 0; i < maxlen; i += channelBytes){
+    for (int i = 0; i + bytesPerFrame <= maxlen; i += bytesPerFrame) {
         double phase = double(m_phasePosition % m_format.sampleRate()) / m_format.sampleRate();
         double value = sin(2 * M_PI * m_frequency * phase);
-        // Scale amplitude
-        qint16 valueInt = static_cast<qint16>(value * Analyzer::getPeakValue(m_format));
-        qToLittleEndian<qint16>(valueInt, ptr);
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+        for (int channel = 0; channel < channelCount; ++channel) {
+            switch (m_format.sampleFormat()) {
+            case QAudioFormat::UInt8: {
+                const quint8 valueUInt8 = quint8((value * 0.5 + 0.5) * UCHAR_MAX);
+                *ptr = valueUInt8;
+                break;
+            }
+            case QAudioFormat::Int16: {
+                const qint16 valueInt16 = static_cast<qint16>(value * SHRT_MAX);
+                qToLittleEndian<qint16>(valueInt16, ptr);
+                break;
+            }
+            case QAudioFormat::Int32: {
+                const qint32 valueInt32 = static_cast<qint32>(value * INT_MAX);
+                qToLittleEndian<qint32>(valueInt32, ptr);
+                break;
+            }
+            case QAudioFormat::Float: {
+                const float valueFloat = static_cast<float>(value);
+                std::memcpy(ptr, &valueFloat, sizeof(valueFloat));
+                break;
+            }
+            case QAudioFormat::Unknown:
+            case QAudioFormat::NSampleFormats:
+                return 0;
+            }
+
+            ptr += channelBytes;
+        }
+#else
+        Q_UNUSED(channelCount)
+        const qint16 valueInt16 = static_cast<qint16>(value * Analyzer::getPeakValue(m_format));
+        qToLittleEndian<qint16>(valueInt16, ptr);
         ptr += channelBytes;
+#endif
         m_phasePosition++;
     }
 
@@ -82,6 +122,16 @@ qint64 AudioBuffer::writeData(const char *data, qint64 maxlen)
     return maxlen;
 }
 
+qint64 AudioBuffer::bytesAvailable() const
+{
+    return 4096 + QIODevice::bytesAvailable();
+}
+
+bool AudioBuffer::isSequential() const
+{
+    return true;
+}
+
 
 
 
@@ -91,10 +141,16 @@ SineWaveGenerator::SineWaveGenerator(QObject *parent) :
     m_frequency(440),
     m_running(false)
 {
-    m_format = guitarToolsCreateMono16AudioFormat(44100);
+    const GuitarToolsAudioDevice outputDevice = guitarToolsDefaultAudioOutputDevice();
+    const QAudioFormat requestedFormat = guitarToolsCreateMono16AudioFormat(44100);
+    m_format = guitarToolsSupportedAudioOutputFormat(outputDevice, requestedFormat);
+
+    if (m_format != requestedFormat) {
+        qDebug() << "Tuning fork output format adjusted from" << requestedFormat << "to" << m_format;
+    }
 
     m_buffer = new AudioBuffer(m_format, m_frequency, this);
-    m_audioOutput = new GuitarToolsAudioOutputStream(m_format, this);
+    m_audioOutput = new GuitarToolsAudioOutputStream(outputDevice, m_format, this);
 
     connect(m_audioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(onAudioOutputStateChanged(QAudio::State)));
 }
@@ -148,6 +204,11 @@ void SineWaveGenerator::onAudioOutputStateChanged(const QAudio::State &state)
         m_running = true;
         emit runningChanged();
         break;
+    case QAudio::StoppedState:
+        if (m_audioOutput->error() != QAudio::NoError) {
+            qWarning() << "Tuning fork audio output error" << m_audioOutput->error();
+        }
+        Q_FALLTHROUGH();
     default:
         m_running = false;
         qDebug() << "Tuning fork stream stopped";
@@ -155,4 +216,3 @@ void SineWaveGenerator::onAudioOutputStateChanged(const QAudio::State &state)
         break;
     }
 }
-

@@ -35,6 +35,11 @@ inline GuitarToolsAudioDevice guitarToolsDefaultAudioInputDevice()
     return QMediaDevices::defaultAudioInput();
 }
 
+inline GuitarToolsAudioDevice guitarToolsDefaultAudioOutputDevice()
+{
+    return QMediaDevices::defaultAudioOutput();
+}
+
 inline QAudioFormat guitarToolsCreateMono16AudioFormat(int sampleRate)
 {
     QAudioFormat format;
@@ -47,6 +52,20 @@ inline QAudioFormat guitarToolsCreateMono16AudioFormat(int sampleRate)
 inline int guitarToolsBytesPerSample(const QAudioFormat &format)
 {
     return format.bytesPerSample();
+}
+
+inline int guitarToolsBytesPerFrame(const QAudioFormat &format)
+{
+    return format.bytesPerFrame();
+}
+
+inline QAudioFormat guitarToolsSupportedAudioOutputFormat(const GuitarToolsAudioDevice &device, const QAudioFormat &requestedFormat)
+{
+    if (device.isFormatSupported(requestedFormat)) {
+        return requestedFormat;
+    }
+
+    return device.preferredFormat();
 }
 #else
 #include <QAudioDeviceInfo>
@@ -75,6 +94,11 @@ inline GuitarToolsAudioDevice guitarToolsDefaultAudioInputDevice()
     return QAudioDeviceInfo::defaultInputDevice();
 }
 
+inline GuitarToolsAudioDevice guitarToolsDefaultAudioOutputDevice()
+{
+    return QAudioDeviceInfo::defaultOutputDevice();
+}
+
 inline QAudioFormat guitarToolsCreateMono16AudioFormat(int sampleRate)
 {
     QAudioFormat format;
@@ -90,6 +114,16 @@ inline QAudioFormat guitarToolsCreateMono16AudioFormat(int sampleRate)
 inline int guitarToolsBytesPerSample(const QAudioFormat &format)
 {
     return format.sampleSize() / 8;
+}
+
+inline int guitarToolsBytesPerFrame(const QAudioFormat &format)
+{
+    return format.channelCount() * guitarToolsBytesPerSample(format);
+}
+
+inline QAudioFormat guitarToolsSupportedAudioOutputFormat(const GuitarToolsAudioDevice &device, const QAudioFormat &requestedFormat)
+{
+    return device.nearestFormat(requestedFormat);
 }
 #endif
 
