@@ -94,6 +94,10 @@ int Metronome::bpm() const
 
 void Metronome::setBpm(const int &bpm)
 {
+    if (m_bpm == bpm) {
+        return;
+    }
+
     m_bpm = bpm;
     emit bpmChanged();
 

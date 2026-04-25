@@ -51,7 +51,6 @@ Page {
     }
 
 
-    property int bpm: Core.metronome.bpm
     property int duration: Core.metronome.period * 1.02
     property real angle: angleMax
     property real angleMin: 25
@@ -87,6 +86,12 @@ Page {
 
         function onTock() {
             pendulumTockAnimation.start()
+        }
+
+        function onBpmChanged() {
+            if (!bpmSlider.pressed) {
+                bpmSlider.value = Core.metronome.bpm
+            }
         }
     }
 
@@ -221,7 +226,7 @@ Page {
             Layout.fillWidth: true
             from: 40
             to: 208
-            value: bpm
+            Component.onCompleted: value = Core.metronome.bpm
             onValueChanged: {
                 Core.settings.metronomeSpeed = Math.round(bpmSlider.value)
                 Core.metronome.bpm = Math.round(bpmSlider.value)
