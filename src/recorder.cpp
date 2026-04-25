@@ -27,14 +27,19 @@ Recorder::Recorder(QObject *parent) :
     QObject(parent),
     m_filePath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/records"),
     m_recordTime("00:00:00"),
-    m_volumeLevel(0)
+    m_volumeLevel(0),
+    m_playbackVolume(0.5)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     m_audioRecorder = new QMediaRecorder(this);
     m_captureSession = new QMediaCaptureSession(this);
     m_audioInput = new QAudioInput(this);
+    m_audioPlayer = new QMediaPlayer(this);
+    m_audioOutput = new QAudioOutput(this);
     m_captureSession->setAudioInput(m_audioInput);
     m_captureSession->setRecorder(m_audioRecorder);
+    m_audioPlayer->setAudioOutput(m_audioOutput);
+    m_audioOutput->setVolume(m_playbackVolume);
 
     QMediaFormat mediaFormat;
     mediaFormat.setFileFormat(QMediaFormat::Ogg);
@@ -45,6 +50,7 @@ Recorder::Recorder(QObject *parent) :
     m_audioRecorder->setQuality(QMediaRecorder::HighQuality);
 #else
     m_audioRecorder = new QAudioRecorder(this);
+    m_audioPlayer = new QMediaPlayer(this);
     qDebug() << "Supported audio codecs:";
     foreach (const QString &codecName, m_audioRecorder->supportedAudioCodecs()) {
         qDebug() << "  ->" << codecName;
@@ -78,8 +84,11 @@ Recorder::Recorder(QObject *parent) :
 
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     connect(m_audioRecorder, SIGNAL(recorderStateChanged(QMediaRecorder::RecorderState)), this, SLOT(onStateChanged(QMediaRecorder::RecorderState)));
+    connect(m_audioPlayer, SIGNAL(playbackStateChanged(QMediaPlayer::PlaybackState)), this, SLOT(onPlaybackStateChanged(QMediaPlayer::PlaybackState)));
 #else
     connect(m_audioRecorder, SIGNAL(stateChanged(QMediaRecorder::State)), this, SLOT(onStateChanged(QMediaRecorder::State)));
+    connect(m_audioPlayer, SIGNAL(stateChanged(QMediaPlayer::State)), this, SLOT(onPlaybackStateChanged(QMediaPlayer::State)));
+    m_audioPlayer->setVolume(qRound(m_playbackVolume * 100.0));
 #endif
     connect(m_audioRecorder, SIGNAL(durationChanged(qint64)), this, SLOT(onDurationChanged(qint64)));
 
@@ -133,6 +142,23 @@ bool Recorder::renameRecordFile(const QString &fileName, const QString &newFileN
 
 }
 
+void Recorder::playRecordFile(const QString &source)
+{
+    const QUrl url(source);
+    qDebug() << "Play record file" << url;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    m_audioPlayer->setSource(url);
+#else
+    m_audioPlayer->setMedia(url);
+#endif
+    m_audioPlayer->play();
+}
+
+void Recorder::stopPlayback()
+{
+    m_audioPlayer->stop();
+}
+
 void Recorder::setMicrophoneVolume(const double &microphoneVolume)
 {
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
@@ -158,6 +184,17 @@ void Recorder::setInputDevice(const QString audioInput)
 #endif
 }
 
+void Recorder::setPlaybackVolume(const double &playbackVolume)
+{
+    m_playbackVolume = qBound(0.0, playbackVolume, 1.0);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    m_audioOutput->setVolume(m_playbackVolume);
+#else
+    m_audioPlayer->setVolume(qRound(m_playbackVolume * 100.0));
+#endif
+    emit playbackVolumeChanged();
+}
+
 QString Recorder::filePath() const
 {
     return m_filePath;
@@ -175,6 +212,20 @@ bool Recorder::running() const
 #else
     return m_audioRecorder->state() == QAudioRecorder::RecordingState;
 #endif
+}
+
+bool Recorder::playing() const
+{
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+    return m_audioPlayer->playbackState() == QMediaPlayer::PlayingState;
+#else
+    return m_audioPlayer->state() == QMediaPlayer::PlayingState;
+#endif
+}
+
+double Recorder::playbackVolume() const
+{
+    return m_playbackVolume;
 }
 
 double Recorder::volumeLevel() const
@@ -233,6 +284,30 @@ void Recorder::onStateChanged(const QMediaRecorder::State &state)
     case QMediaRecorder::StoppedState:
         qDebug() << "Recorder: Stopped";
         emit runningChanged();
+        break;
+    default:
+        break;
+    }
+}
+
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+void Recorder::onPlaybackStateChanged(const QMediaPlayer::PlaybackState &state)
+#else
+void Recorder::onPlaybackStateChanged(const QMediaPlayer::State &state)
+#endif
+{
+    switch (state) {
+    case QMediaPlayer::PlayingState:
+        qDebug() << "Recorder player: Playing";
+        emit playingChanged();
+        break;
+    case QMediaPlayer::PausedState:
+        qDebug() << "Recorder player: Paused";
+        emit playingChanged();
+        break;
+    case QMediaPlayer::StoppedState:
+        qDebug() << "Recorder player: Stopped";
+        emit playingChanged();
         break;
     default:
         break;

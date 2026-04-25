@@ -9,6 +9,7 @@
 #include <QAudioDevice>
 #include <QAudioInput>
 #include <QAudioOutput>
+#include <QMediaPlayer>
 #include <QAudioSink>
 #include <QAudioSource>
 #include <QMediaCaptureSession>
@@ -74,6 +75,7 @@ inline QAudioFormat guitarToolsSupportedAudioOutputFormat(const GuitarToolsAudio
 #include <QAudioOutput>
 #include <QAudioProbe>
 #include <QAudioRecorder>
+#include <QMediaPlayer>
 
 using GuitarToolsAudioDevice = QAudioDeviceInfo;
 using GuitarToolsAudioInputStream = QAudioInput;

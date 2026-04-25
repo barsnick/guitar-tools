@@ -22,7 +22,6 @@
 import QtQuick 2.9
 import QtQuick.Controls 2.2
 import QtQuick.Layouts 1.3
-import QtMultimedia
 import Qt.labs.folderlistmodel 1.0
 import QtQuick.Controls.Material 2.2
 
@@ -62,7 +61,14 @@ Page {
         target: Qt.application
         function onActiveChanged() {
             if (!Qt.application.active)
-                player.stop()
+                Core.recorder.stopPlayback()
+        }
+    }
+
+    Connections {
+        target: Core.settings
+        function onGuitarPlayerVolumeChanged() {
+            Core.recorder.playbackVolume = Core.settings.guitarPlayerVolume / 100.0
         }
     }
 
@@ -73,10 +79,7 @@ Page {
         sortField: "Time"
     }
 
-    Audio {
-        id: player
-        volume: Core.settings.guitarPlayerVolume / 100.0
-    }
+    Component.onCompleted: Core.recorder.playbackVolume = Core.settings.guitarPlayerVolume / 100.0
 
     ListView {
         id: recordsListView
@@ -140,16 +143,15 @@ Page {
 
             onClicked: {
                 recordsListView.currentIndex = index
-                if (player.playbackState !== Audio.PlayingState) {
+                if (!Core.recorder.playing) {
                     root.sourceFile = "file://" + Core.recorder.filePath + "/" + model.fileName
                     root.fileNamePath = Core.recorder.filePath + "/" + model.fileName
                     root.fileName = model.fileName
-                    player.source = sourceFile
                     console.log("Player play")
-                    player.play()
+                    Core.recorder.playRecordFile(sourceFile)
                 } else {
                     console.log("Player stop")
-                    player.stop()
+                    Core.recorder.stopPlayback()
                 }
 
             }

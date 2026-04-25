@@ -34,6 +34,8 @@ class Recorder : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(bool running READ running NOTIFY runningChanged)
+    Q_PROPERTY(bool playing READ playing NOTIFY playingChanged)
+    Q_PROPERTY(double playbackVolume READ playbackVolume WRITE setPlaybackVolume NOTIFY playbackVolumeChanged)
     Q_PROPERTY(QString filePath READ filePath CONSTANT)
     Q_PROPERTY(QString recordTime READ recordTime NOTIFY recordTimeChanged)
     Q_PROPERTY(double volumeLevel READ volumeLevel NOTIFY volumeLevelChanged)
@@ -48,13 +50,18 @@ public:
 
     Q_INVOKABLE bool deleteRecordFile(const QString &fileName);
     Q_INVOKABLE bool renameRecordFile(const QString &fileName, const QString &newFileName);
+    Q_INVOKABLE void playRecordFile(const QString &source);
+    Q_INVOKABLE void stopPlayback();
 
     void setMicrophoneVolume(const double &microphoneVolume);
     void setInputDevice(const QString audioInput);
+    void setPlaybackVolume(const double &playbackVolume);
 
     QString filePath() const;
     QString recordTime() const;
     bool running() const;
+    bool playing() const;
+    double playbackVolume() const;
     double volumeLevel() const;
 
 private:
@@ -62,14 +69,18 @@ private:
     QMediaRecorder *m_audioRecorder;
     QMediaCaptureSession *m_captureSession;
     QAudioInput *m_audioInput;
+    QMediaPlayer *m_audioPlayer;
+    QAudioOutput *m_audioOutput;
 #else
     QAudioRecorder *m_audioRecorder;
     QAudioProbe *m_audioProbe;
+    QMediaPlayer *m_audioPlayer;
 #endif
 
     QString m_filePath;
     QString m_recordTime;
     double m_volumeLevel;
+    double m_playbackVolume;
 
     void setRecordTime(const QString &recordTime);
     void setVolumeLevel(const double &volumeLevel);
@@ -81,12 +92,16 @@ private slots:
     void onDurationChanged(const qint64& duration);
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     void onStateChanged(const QMediaRecorder::RecorderState &state);
+    void onPlaybackStateChanged(const QMediaPlayer::PlaybackState &state);
 #else
     void onStateChanged(const QMediaRecorder::State &state);
+    void onPlaybackStateChanged(const QMediaPlayer::State &state);
 #endif
 
 signals:
     void runningChanged();
+    void playingChanged();
+    void playbackVolumeChanged();
     void recordTimeChanged();
     void volumeLevelChanged();
 };
