@@ -18,281 +18,228 @@
  *                                                                         *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-import QtQuick 2.7
-import QtQuick.Layouts 1.1
-import Ubuntu.Components 1.3
-import Ubuntu.Components.Popups 1.3
-import Ubuntu.Components.ListItems 1.3
-import Ubuntu.Components.Pickers 1.3
+import QtQuick 2.9
+import QtQuick.Controls 2.2
+import QtQuick.Layouts 1.3
+import QtQuick.Controls.Material 2.2
+
 import GuitarTools 1.0
+import "components"
 
 Page {
     id: root
-    header: PageHeader {
-        id: pageHeader
-        // TRANSLATORS: Title of the song settings page of the composer tool
-        title: qsTr("Song settings")
-        flickable: settingsFlickable
+
+    header: ToolBar {
+        RowLayout {
+            anchors.fill: parent
+
+            IconToolButton {
+                iconSource: dataDirectory + "/icons/back.svg"
+                onClicked: pageStack.pop()
+            }
+
+            Label {
+                text: qsTr("Song settings")
+                elide: Label.ElideRight
+                verticalAlignment: Qt.AlignVCenter
+                Layout.fillWidth: true
+            }
+        }
+    }
+
+    Dialog {
+        id: clearNotesDialog
+        anchors.centerIn: parent
+        modal: true
+        title: qsTr("Clear all notes")
+
+        contentItem: Label {
+            text: qsTr("Are you sure you want to clear all notes in this song?")
+            wrapMode: Text.WordWrap
+        }
+
+        footer: DialogButtonBox {
+            standardButtons: DialogButtonBox.Cancel
+
+            Button {
+                text: qsTr("Clear")
+                DialogButtonBox.buttonRole: DialogButtonBox.AcceptRole
+                onClicked: {
+                    clearNotesDialog.close()
+                    Core.composeTool.clearNotes()
+                }
+            }
+        }
     }
 
     Flickable {
         id: settingsFlickable
         anchors.fill: parent
-        contentHeight: settingsColumn.height
+        clip: true
+        contentWidth: width
+        contentHeight: settingsColumn.implicitHeight
+        ScrollIndicator.vertical: ScrollIndicator { }
 
         ColumnLayout {
             id: settingsColumn
+            width: settingsFlickable.width
             anchors.left: parent.left
-            anchors.leftMargin: units.gu(2)
             anchors.right: parent.right
-            anchors.rightMargin: units.gu(2)
-
-            spacing: units.gu(1)
+            anchors.margins: 10
+            spacing: 8
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: units.gu(10)
+                Layout.preferredHeight: 80
 
-                Column {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
+                ColumnLayout {
+                    anchors.fill: parent
 
                     Label {
-                        // TRANSLATORS: The measures slider in the song settings. Indicates how many measures the song has.
+                        Layout.fillWidth: true
                         text: qsTr("Measures") + ": " + Core.composeTool.measureCount + " (" + Core.composeTool.songDurationString + ")"
                     }
 
                     RowLayout {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                        Layout.fillWidth: true
 
-                        Icon {
-                            Layout.minimumWidth: units.gu(3)
-                            implicitHeight: units.gu(3)
-                            implicitWidth: width
-                            name: "remove"
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: measureSlider.value = measureSlider.minimumValue
-                            }
+                        IconToolButton {
+                            iconSource: dataDirectory + "/icons/remove.svg"
+                            onClicked: measureSlider.value = measureSlider.from
                         }
 
                         Slider {
                             id: measureSlider
                             Layout.fillWidth: true
-                            minimumValue: 1
-                            maximumValue: 60
+                            from: 1
+                            to: 60
                             onValueChanged: {
                                 Core.composeTool.measureCount = Math.round(value)
                                 Core.composeTool.save()
                             }
-                            Component.onCompleted: measureSlider.value = Core.composeTool.measureCount
+                            Component.onCompleted: value = Core.composeTool.measureCount
                         }
 
-                        Icon {
-                            Layout.minimumWidth: units.gu(3)
-                            implicitHeight: units.gu(3)
-                            implicitWidth: width
-                            name: "add"
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: measureSlider.value = measureSlider.maximumValue
-                            }
+                        IconToolButton {
+                            iconSource: dataDirectory + "/icons/add.svg"
+                            onClicked: measureSlider.value = measureSlider.to
                         }
                     }
                 }
             }
 
-            ThinDivider { }
+            MenuSeparator { Layout.fillWidth: true }
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: units.gu(10)
+                Layout.preferredHeight: 80
 
-                Column {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
+                ColumnLayout {
+                    anchors.fill: parent
 
                     Label {
-                        // TRANSLATORS: The tracks slider description in the compose tool song settings (rows of the compose tool)
+                        Layout.fillWidth: true
                         text: qsTr("Tracks") + " (" + Math.round(trackSlider.value) + ")"
                     }
 
                     RowLayout {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                        Layout.fillWidth: true
 
-                        Icon {
-                            Layout.minimumWidth: units.gu(3)
-                            implicitHeight: units.gu(3)
-                            implicitWidth: width
-                            name: "remove"
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: trackSlider.value = trackSlider.minimumValue
-                            }
+                        IconToolButton {
+                            iconSource: dataDirectory + "/icons/remove.svg"
+                            onClicked: trackSlider.value = trackSlider.from
                         }
 
                         Slider {
                             id: trackSlider
                             Layout.fillWidth: true
-                            minimumValue: 1
-                            maximumValue: 8
+                            from: 1
+                            to: 8
                             onValueChanged: {
                                 Core.composeTool.trackCount = Math.round(value)
                                 Core.composeTool.save()
                             }
-                            Component.onCompleted: trackSlider.value = Core.composeTool.trackCount
+                            Component.onCompleted: value = Core.composeTool.trackCount
                         }
 
-                        Icon {
-                            Layout.minimumWidth: units.gu(3)
-                            implicitHeight: units.gu(3)
-                            implicitWidth: width
-                            name: "add"
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: trackSlider.value = trackSlider.maximumValue
-                            }
+                        IconToolButton {
+                            iconSource: dataDirectory + "/icons/add.svg"
+                            onClicked: trackSlider.value = trackSlider.to
                         }
                     }
                 }
             }
 
-            ThinDivider { }
+            MenuSeparator { Layout.fillWidth: true }
 
             Item {
                 Layout.fillWidth: true
-                Layout.preferredHeight: units.gu(10)
+                Layout.preferredHeight: 80
 
-                Column {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
+                ColumnLayout {
+                    anchors.fill: parent
 
                     Label {
-                        // TRANSLATORS: The bpm description in the compose tool song settings
+                        Layout.fillWidth: true
                         text: qsTr("Beats per minute") + " (" + Math.round(bpmSlider.value) + ")"
                     }
 
                     RowLayout {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                        Layout.fillWidth: true
 
-                        Icon {
-                            Layout.minimumWidth: units.gu(3)
-                            implicitHeight: units.gu(3)
-                            implicitWidth: width
-                            name: "remove"
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: bpmSlider.value = bpmSlider.minimumValue
-                            }
+                        IconToolButton {
+                            iconSource: dataDirectory + "/icons/remove.svg"
+                            onClicked: bpmSlider.value = bpmSlider.from
                         }
 
                         Slider {
                             id: bpmSlider
                             Layout.fillWidth: true
-                            minimumValue: 40
-                            maximumValue: 208
+                            from: 40
+                            to: 208
                             onValueChanged: {
                                 Core.composeTool.bpm = Math.round(value)
                                 Core.composeTool.save()
                             }
-
-                            Component.onCompleted: bpmSlider.value = Core.composeTool.bpm
+                            Component.onCompleted: value = Core.composeTool.bpm
                         }
 
-                        Icon {
-                            Layout.minimumWidth: units.gu(3)
-                            implicitHeight: units.gu(3)
-                            implicitWidth: width
-                            name: "add"
-                            MouseArea {
-                                anchors.fill: parent
-                                onClicked: bpmSlider.value = bpmSlider.maximumValue
-                            }
+                        IconToolButton {
+                            iconSource: dataDirectory + "/icons/add.svg"
+                            onClicked: bpmSlider.value = bpmSlider.to
                         }
                     }
                 }
             }
 
-            ThinDivider { }
-
+            MenuSeparator { Layout.fillWidth: true }
 
             Label {
-                // TRANSLATORS: The rythm description in the compose tool song settings (i.e. 4/4)
-                text: qsTr("Rhythm") + " (" + tickPicker.model[tickPicker.selectedIndex] + "/4)"
+                Layout.fillWidth: true
+                text: qsTr("Rhythm") + " (" + rhythmSelector.currentText + "/4)"
             }
 
-            Row {
+            ComboBox {
+                id: rhythmSelector
                 Layout.fillWidth: true
-                Layout.alignment: Qt.AlignHCenter
-
-                Picker {
-                    id: tickPicker
-                    width: parent.width
-                    model: [2, 3, 4, 5, 6, 7, 8]
-                    circular: false
-                    delegate: PickerDelegate {
-                        Label {
-                            anchors.centerIn: parent
-                            text: modelData
-                        }
-                    }
-                    onSelectedIndexChanged: {
-                        Core.composeTool.rythmTicks = tickPicker.model[selectedIndex]
+                model: [2, 3, 4, 5, 6, 7, 8]
+                onCurrentIndexChanged: {
+                    if (currentIndex >= 0) {
+                        Core.composeTool.rythmTicks = model[currentIndex]
                         Core.composeTool.save()
                     }
-                    Component.onCompleted: selectedIndex = Core.composeTool.rythmTicks - 2
                 }
+                Component.onCompleted: currentIndex = Math.max(0, model.indexOf(Core.composeTool.rythmTicks))
             }
 
-            ThinDivider { }
+            MenuSeparator { Layout.fillWidth: true }
 
             Button {
                 id: clearNotesButton
-                // TRANSLATORS: Removes all notes in the compose tool
                 text: qsTr("Clear all notes")
                 Layout.fillWidth: true
-                color: UbuntuColors.red
-                onClicked: PopupUtils.open(clearNotesComponent)
+                onClicked: clearNotesDialog.open()
             }
         }
-
-        Component {
-            id: clearNotesComponent
-            Dialog {
-                id: clearNotesDialog
-
-                // TRANSLATORS: Title of the clear notes dialog
-                title: qsTr("Clear all notes")
-
-                // TRANSLATORS: Clear question for the delete song dialog
-                text: qsTr("Are you sure you want to clear all notes in this song?")
-
-                Button {
-                    id: deleteButton
-                    text: qsTr("Clear")
-                    color: UbuntuColors.red
-                    onClicked: {
-                        PopupUtils.close(clearNotesDialog)
-                        Core.composeTool.clearNotes()
-                    }
-                }
-
-                ThinDivider { }
-
-                Button {
-                    text: qsTr("Cancel")
-                    color: UbuntuColors.green
-                    onClicked: PopupUtils.close(clearNotesDialog)
-                }
-
-            }
-        }
-
     }
 }
