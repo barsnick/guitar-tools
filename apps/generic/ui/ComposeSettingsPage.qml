@@ -49,11 +49,14 @@ Page {
 
     Dialog {
         id: clearNotesDialog
-        anchors.centerIn: parent
         modal: true
         title: qsTr("Clear all notes")
+        x: Math.round((root.width - width) / 2)
+        y: Math.round((root.height - height) / 2)
+        width: Math.min(root.width - 40, 420)
 
         contentItem: Label {
+            width: clearNotesDialog.availableWidth
             text: qsTr("Are you sure you want to clear all notes in this song?")
             wrapMode: Text.WordWrap
         }
