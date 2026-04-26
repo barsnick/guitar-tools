@@ -65,6 +65,20 @@ static const char fmtStr[]  = "fmt ";
 static const char factStr[] = "fact";
 static const char dataStr[] = "data";
 
+// compatibility to soundtouch < 2.0.0
+#ifndef ST_THROW_RT_ERROR
+// define ST_NO_EXCEPTION_HANDLING switch to disable throwing std exceptions:
+// #define ST_NO_EXCEPTION_HANDLING    1
+#ifdef ST_NO_EXCEPTION_HANDLING
+    // Exceptions disabled. Throw asserts instead if enabled.
+    #include <assert.h>
+    #define ST_THROW_RT_ERROR(x)    {assert((const char *)x);}
+#else
+    // use c++ standard exceptions
+    #include <stdexcept>
+    #define ST_THROW_RT_ERROR(x)    {throw std::runtime_error(x);}
+#endif
+#endif // ST_THROW_RT_ERROR
 
 //////////////////////////////////////////////////////////////////////////////
 //
